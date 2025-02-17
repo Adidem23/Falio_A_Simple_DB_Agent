@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import './Command.css';
 import axios from 'axios';
+import Falio from '../Media/FaLIo.jpg';
 
 const Command = () => {
   const [isListening, setIsListening] = useState(false);
@@ -25,7 +26,7 @@ const Command = () => {
 
     recognition.onstart = () => {
       setIsListening(true);
-      setMessage("BOT🤖 is Thinking ...");
+      setMessage("BOT🤖 is generating ...");
     };
 
     recognition.onresult = (event) => {
@@ -64,6 +65,7 @@ const Command = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <img src={Falio}  style={{marginTop:'30px',borderRadius:"50%",width:"350px",height:"300px"}} alt="NO FALIO FOUND...."/>
       <h1 className="text-2xl font-bold mb-4">Falio : DB Agent 🤖</h1>
       <p className="text-lg mb-6">{message}</p>
 
