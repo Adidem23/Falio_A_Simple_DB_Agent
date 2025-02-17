@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+    display: block;
+    width:fit-content;
+    margin-top: 20px;
+    margin-right:20px;
+    height: 100vh;
+    margin:auto;
+    background-color: #f0f0f0;
+}
+
+.app {
+    text-align: center;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+}
+
+button {
+    position: relative;
+    display: inline-block;
+    padding: 15px 30px;
+    text-align: center;
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-decoration: none;
+    color: #725AC1;
+    background: transparent;
+    cursor: pointer;
+    transition: ease-out 0.5s;
+    border: 2px solid #725AC1;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 0 #725AC1;
+}
+
+button:hover {
+    color: white;
+    box-shadow: inset 0 -100px 0 0 #725AC1;
+}
+
+button:active {
+    transform: scale(0.9);
+}
