@@ -1,6 +1,6 @@
 <div align="center">
- <img src="https://github.com/user-attachments/assets/7b2bf691-110e-45a9-8454-a838d5aa1738" height="150px" width="150px" />
-  <h3 align="center">EIMSIM : The EIM And JIRA Simulator</h3>
+ <img src="" height="150px" width="150px" />
+  <h3 align="center">Falio : A Simple AI Agent</h3>
 </div>
 <details>
   <summary>Table of Contents</summary>
