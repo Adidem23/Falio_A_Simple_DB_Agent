@@ -45,16 +45,13 @@ Set up real-time notifications to relevant team members upon ticket creation, en
 Develop detailed reporting and analytics features to track the performance of the automated ticketing system, identify trends, and optimize the process continuously.
 
 # Video :
-- Youtube : https://youtu.be/vi2NSczOVG8?si=u_BCq_6KJqdTxkO7
+- Youtube :
 
 # Architcture Diagram : 
-![Untitled-2023-10-05-0753](https://github.com/user-attachments/assets/92053687-cfe9-4b30-9e8b-62d0e0a78063)
+![diagram-export-17-02-2025-23_50_35](https://github.com/user-attachments/assets/c3fcb082-b0b3-4b3c-bd50-0bfee84f4f90)
 
 # Built With : 
-
  - [![My Skills](https://skillicons.dev/icons?i=react&perline=3)](https://skillicons.dev) ReactJs
  - [![My Skills](https://skillicons.dev/icons?i=nodejs&perline=3)](https://skillicons.dev) NodeJs
  - [![My Skills](https://skillicons.dev/icons?i=express&perline=3)](https://skillicons.dev) ExpressJs
- - [![My Skills](https://skillicons.dev/icons?i=jenkins&perline=3)](https://skillicons.dev) Jenkins
- - [![My Skills](https://skillicons.dev/icons?i=python&perline=3)](https://skillicons.dev) Python
 - [![My Skills](https://skillicons.dev/icons?i=mongodb&perline=3)](https://skillicons.dev) MongoDB
