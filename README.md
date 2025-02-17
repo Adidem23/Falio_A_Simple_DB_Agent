@@ -29,20 +29,9 @@ The Voice-Controlled MongoDB Agent is an AI-powered assistant that enables hands
 
 ## Key Features :
 
-•	Enhance Accuracy and Consistency:
-Ensure that tickets are created with accurate and consistent information, reducing the chances of human error that can occur during manual entry.
-
-•	Integration with Monitoring Tools:
-Seamlessly integrate with existing monitoring and alerting tools to trigger JIRA ticket creation based on predefined thresholds or events, ensuring that issues are captured in real-time.
-
-•	Customizable Workflow Automation:
-Implement customizable workflows in JIRA that automatically assign, prioritize, and transition tickets based on the type of data entry or detected issue.
-
-•	Real-Time Notifications and Alerts:
-Set up real-time notifications to relevant team members upon ticket creation, ensuring prompt attention and response to critical issues.
-
-•	Comprehensive Reporting and Analytics:
-Develop detailed reporting and analytics features to track the performance of the automated ticketing system, identify trends, and optimize the process continuously.
+- 🎙️ Voice-Based Commands: Perform CRUD operations using natural speech.
+- ⚡ Real-Time Processing: Converts speech to structured MongoDB queries instantly.
+- 📊 Data Retrieval: Fetch and filter records using spoken queries.
 
 # Video :
 - Youtube :
