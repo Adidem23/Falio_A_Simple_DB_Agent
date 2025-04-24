@@ -27,6 +27,7 @@ The Voice-Controlled MongoDB Agent is an AI-powered assistant that enables hands
 
 # Video :
 - Youtube : https://youtu.be/hzAIX3B4uNQ?si=n5LNakOh16yWkZBU
+- Frontend Deployment : https://falio.vercel.app/
 
 # Architcture Diagram : 
 ![diagram-export-17-02-2025-23_50_35](https://github.com/user-attachments/assets/c3fcb082-b0b3-4b3c-bd50-0bfee84f4f90)
