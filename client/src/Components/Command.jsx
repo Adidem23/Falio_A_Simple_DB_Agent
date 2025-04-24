@@ -48,7 +48,7 @@ const Command = () => {
 
   const handleCommand = async (command) => {
 
-    const response = await axios.post("http://localhost:1820/askrequest", { message: command }, { withCredentials: true });
+    const response = await axios.post("https://falio-back.vercel.app/askrequest", { message: command }, { withCredentials: true });
 
     setHistory((prevHistory) => [...prevHistory, { user: command, assistant: response['data'].answer }]);
 
