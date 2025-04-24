@@ -6,14 +6,15 @@ const mongoose = require('mongoose');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const TODODB = require('./models/index');
 const PORT = 1820;
-const axios = require('axios')
+const axios = require('axios');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 
 app.use(BODY_PARSER.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(CORS({
-  origin: "http://localhost:5173",
+  origin: "*",
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -89,7 +90,7 @@ app.post("/askrequest", async (req, res) => {
       }
     });
 
-    const emailPromises = Allmails.data.messages.slice(0,5).map(async (message) => {
+    const emailPromises = Allmails.data.messages.slice(0, 5).map(async (message) => {
       const particularEmail = await axios.get(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${message.id}`, {
         headers: { Authorization: `Bearer ${Access_Token}` }
       });
@@ -107,10 +108,46 @@ app.post("/askrequest", async (req, res) => {
     return AllEmails_Object;
   }
 
+  async function sendEmail() {
+
+    // const Access_Token = getAccessToken()
+
+    // const particularEmail = await axios.get(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageID}`, {
+    //   headers: {
+    //     Authorization: ` Bearer ${Access_Token}`
+    //   }
+    // });
+
+
+    // const headers = particularEmail.data.payload.headers;
+    // const rec_Addres = "hello@careercamp.codingninjas.com"
+    // const messageIdHeader = headers.find((h) => h.name === "Message-ID")?.value;
+
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GOOLGLE_EMAIL_ID,
+        pass: process.env.GOOGLE_GMAIL_SECRET_CODE,
+      },
+    });
+
+    await transporter.sendMail({
+      from: 'adityasuryawanshi5451@gmail.com',
+      to: `${rec_Addres}`,
+      subject: "This is Agent Generated Email used For Testing",
+      text: `I want to apply for the bootcamp`,
+    });
+
+    return "Email has been replied Successfully"
+
+  }
+
   const tools = {
     AddTODO: AddTODO,
     getAllTODO: getAllTODO,
-    FetchAllEmails: FetchAllEmails
+    FetchAllEmails: FetchAllEmails,
+    sendEmail: sendEmail
   }
 
   const SYSTEM_PROMPT = `
@@ -224,6 +261,7 @@ app.post("/askrequest", async (req, res) => {
 
    Available tools for Gmail :
   - FetchAllEmails() : Fetches latest Emails of the user
+  - sendEmail(messageID,body) : Reply to email with particluar messsage
 
   Example 1:
   START
@@ -242,6 +280,7 @@ app.post("/askrequest", async (req, res) => {
   {
   FROM: 'Coding Ninjas <mailer@certifications.codingninjas.com>',
   Date: 'Wed, 05 Mar 2025 07:39:12 +0000',
+  id:"19567e9120d360f5",
   Subject: 'Update: Confirm your spot for E&ICT, IIT Guwahati data analytics certification program',  
   peekText: 'Click to know more Follow us: YouTube LinkedIn Instagram Facebook You&#39;re receiving this email because you signed up with https://www.codingninjas.com/ Question? Contact contact@codingninjas.com or'
 },
@@ -249,6 +288,7 @@ app.post("/askrequest", async (req, res) => {
 {
   FROM: 'LMU Graduate Admission <graduateadmission@lmu.edu>',
   Date: 'Wed, 05 Mar 2025 20:04:42 +0000 (UTC)',
+  id:"19567e9120d36056y",
   Subject: 'Important Reminder: RSVP for Grad Open House Week',
   peekText: 'LMU Graduate Admission Dear Aditya, Our faculty and staff are eagerly making final preparations for our Graduate Programs Open House Week, taking place Tuesday, March 18 through Friday, March 21. You'
 }
@@ -262,8 +302,22 @@ app.post("/askrequest", async (req, res) => {
   Update: Confirm your spot for E&ICT, IIT Guwahati data analytics certification program and 
   Important Reminder: RSVP for Grad Open House Week respectively
   "}
-   
-    `
+
+  Example 2: 
+  START
+  {"type":"user","user":"Reply to coding ninjas email"}
+
+  {"type":"plan","plan":"I will sendEmail Function from available gmail tools"}
+  
+  {"type":"action","function":"sendEmail","input":""}
+
+  {"type":"plan","plan":"I will wait for the observation"}
+
+  {"type":"observation","observation":""Email has been replied Successfully""}
+
+  {"type":"output","output":"Replied to your Email Successfully"}
+
+`
 
   const model = client.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: SYSTEM_PROMPT });
 
@@ -304,7 +358,7 @@ app.post("/askrequest", async (req, res) => {
         type: "observation",
         observation: observation
       };
-      
+
       const newAnswer = await chat.sendMessage(JSON.stringify(response))
       const newFinalResponse = extractJsonObjects(newAnswer.response.text())
       for (ans of newFinalResponse) {

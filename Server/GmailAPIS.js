@@ -30,6 +30,8 @@ const makeGmailApiRequest = async () => {
 
     const Access_Token = await getAccessToken();
 
+    console.log(Access_Token);
+
     const Allmails = await axios.get("https://gmail.googleapis.com/gmail/v1/users/me/messages?q=category:primary", {
         headers: {
             Authorization: `Bearer ${Access_Token}`
