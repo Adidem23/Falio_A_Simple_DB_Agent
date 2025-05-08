@@ -11,6 +11,9 @@ dependencies:
   '@google/generative-ai':
     specifier: ^0.21.0
     version: 0.21.0
+  '@pinecone-database/pinecone':
+    specifier: ^5.1.2
+    version: 5.1.2
   '@types/node':
     specifier: ^22.13.1
     version: 22.13.1
@@ -50,6 +53,9 @@ dependencies:
   readline-sync:
     specifier: ^1.4.10
     version: 1.4.10
+  uuid:
+    specifier: ^11.1.0
+    version: 11.1.0
 
 devDependencies:
   '@playwright/test':
@@ -80,6 +86,11 @@ packages:
     resolution: {integrity: sha512-+ywrb0AqkfaYuhHs6LxKWgqbh3I72EpEgESCw37o+9qPx9WTCkgDm2B+eMrwehGtHBWHFU4GXvnSCNiFhhausg==}
     dependencies:
       sparse-bitfield: 3.0.3
+    dev: false
+
+  /@pinecone-database/pinecone@5.1.2:
+    resolution: {integrity: sha512-z7737KUA1hXwd508q1+o4bnRxj0NpMmzA2beyaFm7Y+EC2TYLT5ABuYsn/qhiwiEsYp8v1qS596eBhhvgNagig==}
+    engines: {node: '>=18.0.0'}
     dev: false
 
   /@playwright/test@1.50.1:
@@ -1191,6 +1202,11 @@ packages:
   /utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
+    dev: false
+
+  /uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+    hasBin: true
     dev: false
 
   /uuid@9.0.1:

@@ -8,13 +8,15 @@ const TODODB = require('./models/index');
 const PORT = 1820;
 const axios = require('axios');
 const nodemailer = require('nodemailer');
+const { Pinecone } = require('@pinecone-database/pinecone')
+const { v4: uuidv4 } = require("uuid");
 require('dotenv').config();
 
 
 app.use(BODY_PARSER.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(CORS({
-  origin: "*",
+  origin: "http://localhost:5173",
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -29,6 +31,18 @@ app.get("/", (req, res) => {
 app.post("/askrequest", async (req, res) => {
 
   const client = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_CLIENT_ID);
+
+  const pineconeInstance = new Pinecone({
+    apiKey: process.env.PINECONE_API_KEY,
+  })
+
+
+  const generateEmbeddings = async (text) => {
+    const model = client.getGenerativeModel({ model: "gemini-embedding-exp-03-07" });
+    const result = await model.embedContent(text);
+    const embedding = result.embedding;
+    return embedding.values;
+  }
 
   function AddTODO(title) {
 
@@ -143,12 +157,48 @@ app.post("/askrequest", async (req, res) => {
 
   }
 
+  async function getContext() {
+    const questionEmbedding = await generateEmbeddings(req.body.message);
+    const index = pineconeInstance.Index('database-agent-memory')
+    const queryResponse = await index.query({
+      vector: questionEmbedding,
+      topK: 5,
+      includeMetadata: true,
+      includeValues: true,
+    });
+
+    let contexts = queryResponse['matches'].map(item => item['metadata'].text)
+    contexts = contexts.join("\n\n---\n\n")
+    return contexts;
+  }
+
+
+
+  function extractJsonObjects(input) {
+    const cleaned = input.replace(/```json|```/g, '').trim();
+    const jsonMatches = cleaned.match(/\{(?:[^{}]|{[^{}]*})*\}/g);
+    if (!jsonMatches) return [];
+    return jsonMatches.map(json => {
+      try {
+        return JSON.parse(json);
+      } catch (error) {
+        console.error("Error parsing JSON:", error, json);
+        return null;
+      }
+    }).filter(obj => obj !== null);
+
+  }
+
+
+
   const tools = {
     AddTODO: AddTODO,
     getAllTODO: getAllTODO,
+    getContext: getContext,
     FetchAllEmails: FetchAllEmails,
     sendEmail: sendEmail
   }
+
 
   const SYSTEM_PROMPT = `
     
@@ -156,6 +206,7 @@ app.post("/askrequest", async (req, res) => {
     
     Your To-Do list Manager workflow is described below: 
     You can manage your to-do list by adding, deleting, and updating tasks. You must strictly follow the JSON output format.You are AI assistant with START , PLAN , ACTION , Obsevation  and Output State . Wait for  the user prompt and first PLAN using available tools . After Planning , take ACTION with apporriate tools and wait for the observation based on Action . Once ypu get observations , Returns the AI output based on START prompt and observations.
+
 
     Todo DB Schema : 
     title: {
@@ -173,14 +224,22 @@ app.post("/askrequest", async (req, res) => {
     Available tools :
     AddTODO(title) : Add a new todo item and returns the added todo item.
     getAllTODO() : returns all the todo items.
+    getContext() : returns the context of the user query.
 
     Example 1:
     START
     {"type":"user","user":"Add a task for shopping"}
 
     {"type":"plan","plan":"I will try to get more context on what the user wants to shop for"}
+    {"type":"plan","plan":"I will call getContext function to get the context of the user query"}
 
-    {"type":"output","output":"What do you want to shop for?"}
+    {"type":"action","function":"getContext","input":""}
+      
+    {"type":"plan","plan":"I will wait for the observation from the getContext function"}
+  
+    {"type":"observation","observation":"-- I love vegetables and fruits ---"}
+
+    {"type":"output","output":"What do you want to shop for Vegetable or fruits ?"}
 
     {"type":"user","user":"I want to shop for Grocries"}
 
@@ -262,7 +321,7 @@ app.post("/askrequest", async (req, res) => {
    Available tools for Gmail :
   - FetchAllEmails() : Fetches latest Emails of the user
   - sendEmail(messageID,body) : Reply to email with particluar messsage
-
+ -    getContext() : returns the context of the user query.
   Example 1:
   START
   {"type":"user","user":"Fetch my latest Emails from my Inboxes"}
@@ -283,7 +342,7 @@ app.post("/askrequest", async (req, res) => {
   id:"19567e9120d360f5",
   Subject: 'Update: Confirm your spot for E&ICT, IIT Guwahati data analytics certification program',  
   peekText: 'Click to know more Follow us: YouTube LinkedIn Instagram Facebook You&#39;re receiving this email because you signed up with https://www.codingninjas.com/ Question? Contact contact@codingninjas.com or'
-},
+  },
 
 {
   FROM: 'LMU Graduate Admission <graduateadmission@lmu.edu>',
@@ -317,32 +376,41 @@ app.post("/askrequest", async (req, res) => {
 
   {"type":"output","output":"Replied to your Email Successfully"}
 
+
+
 `
 
   const model = client.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: SYSTEM_PROMPT });
-
-  function extractJsonObjects(input) {
-    const cleaned = input.replace(/```json|```/g, '').trim();
-    const jsonMatches = cleaned.match(/\{(?:[^{}]|{[^{}]*})*\}/g);
-    if (!jsonMatches) return [];
-    return jsonMatches.map(json => {
-      try {
-        return JSON.parse(json);
-      } catch (error) {
-        console.error("Error parsing JSON:", error, json);
-        return null;
-      }
-    }).filter(obj => obj !== null);
-
-  }
-
   const chat = model.startChat({ history: [] });
-
   const answer = await chat.sendMessage(req.body.message);
   const FinalResponse = extractJsonObjects(answer.response.text());
 
   for (const answer of FinalResponse) {
     if (answer.type === "output") {
+      const Pinecone_UPSERT_OBJECT = [{
+        id: uuidv4(),
+        values: await generateEmbeddings(req.body.message),
+        metadata: {
+          type: "query",
+          text: req.body.message,
+          timestamp: new Date().toISOString(),
+        }
+      }
+        ,
+
+      {
+        id: uuidv4(),
+        values: await generateEmbeddings(answer.output),
+        metadata: {
+          type: "answer",
+          text: answer.output,
+          timestamp: new Date().toISOString(),
+        }
+      }
+      ]
+      const index = pineconeInstance.Index('database-agent-memory')
+      await index.upsert(Pinecone_UPSERT_OBJECT);
+      console.log("Data has been inserted in Pinecone DB");
       return res.json({ "answer": answer.output })
     }
 
@@ -363,6 +431,30 @@ app.post("/askrequest", async (req, res) => {
       const newFinalResponse = extractJsonObjects(newAnswer.response.text())
       for (ans of newFinalResponse) {
         if (ans.type === "output") {
+          const Pinecone_UPSERT_OBJECT = [{
+            id: uuidv4(),
+            values: await generateEmbeddings(req.body.message),
+            metadata: {
+              type: "query",
+              text: req.body.message,
+              timestamp: new Date().toISOString(),
+            }
+          }
+            ,
+
+          {
+            id: uuidv4(),
+            values: await generateEmbeddings(ans.output),
+            metadata: {
+              type: "answer",
+              text: ans.output,
+              timestamp: new Date().toISOString(),
+            }
+          }
+          ]
+          const index = pineconeInstance.Index('database-agent-memory')
+          await index.upsert(Pinecone_UPSERT_OBJECT);
+          console.log("Data has been inserted in Pinecone DB");
           return res.json({ "answer": ans.output })
         }
       }

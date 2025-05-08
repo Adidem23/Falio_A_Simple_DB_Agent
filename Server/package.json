@@ -12,6 +12,7 @@
   "dependencies": {
     "@google-cloud/local-auth": "2.1.0",
     "@google/generative-ai": "^0.21.0",
+    "@pinecone-database/pinecone": "^5.1.2",
     "@types/node": "^22.13.1",
     "axios": "^1.8.1",
     "body-parser": "^1.20.3",
@@ -24,7 +25,8 @@
     "nodemailer": "^6.10.0",
     "open": "^10.1.0",
     "openai": "^4.83.0",
-    "readline-sync": "^1.4.10"
+    "readline-sync": "^1.4.10",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.1"
